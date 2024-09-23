@@ -11,6 +11,9 @@ public class ItemUpdateHandler {
         void update(Item item);
     }
 
+    private int MAX_QUALITY = 50;
+    private int MIN_QUALITY = 0;
+
     private final Map<String, ItemUpdateStrategy> strategies = new HashMap<>();
 
     public ItemUpdateHandler() {
@@ -28,30 +31,38 @@ public class ItemUpdateHandler {
 
     private void updateStandardItem(@NotNull Item item) {
         item.sellIn--;
-        if (item.sellIn < 0 && item.quality - 1 > 0) {
-            item.quality -= 2;
-        } else if (item.quality > 0) {
-            item.quality--;
+        int decrease;
+        if (item.sellIn < 0) {
+            decrease = 2;
+        } else {
+            decrease = 1;
         }
+
+        item.quality = checkQualityDecrease(item.quality, decrease, MIN_QUALITY);
     }
 
     private void updateAgedBrie(@NotNull Item item) {
         item.sellIn--;
-        if (item.quality < 50) {
+        if (item.quality < MAX_QUALITY) {
             item.quality++;
         }
     }
 
     private void updateBackstagePass(@NotNull Item item) {
         item.sellIn--;
+        int increase = 0;
         if (item.sellIn < 0) {
             item.quality = 0;
-        } else if (item.sellIn <= 5 && item.quality + 2 < 50) {
-            item.quality += 2;
-        } else if (item.sellIn <= 10 && item.quality + 3 < 50) {
-            item.quality += 3;
-        } else if (item.quality < 50) {
-            item.quality++;
+        } else if (item.sellIn > 10) {
+            increase = 1;
+        } else if (item.sellIn > 5) {
+            increase = 2;
+        } else {
+            increase = 3;
+        }
+
+        if (increase > 0) {
+            item.quality = checkQualityIncrease(item.quality, increase, MAX_QUALITY);
         }
     }
 
@@ -61,10 +72,26 @@ public class ItemUpdateHandler {
 
     private void updateConjured(@NotNull Item item) {
         item.sellIn--;
-        if (item.sellIn < 0 && item.quality - 3 > 0) {
-            item.quality -= 4;
-        } else if (item.quality - 1 > 0) {
-            item.quality -= 2;
+        int decrease;
+        if (item.sellIn < 0) {
+            decrease = 4;
+        } else {
+            decrease = 2;
         }
+        item.quality = checkQualityDecrease(item.quality, decrease, MIN_QUALITY);;
+    }
+
+    private int checkQualityIncrease(int quality, int increase, int max) {
+        if (quality + increase > max) {
+            return max;
+        }
+        return quality + increase;
+    }
+
+    private int checkQualityDecrease(int quality, int decrease, int min) {
+        if (quality - decrease < min) {
+            return min;
+        }
+        return quality - decrease;
     }
 }
