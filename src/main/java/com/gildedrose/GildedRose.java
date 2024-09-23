@@ -2,9 +2,11 @@ package com.gildedrose;
 
 class GildedRose {
     Item[] items;
+    ItemUpdateHandler itemUpdateHandler;
 
     public GildedRose(Item[] items) {
         this.items = items;
+        this.itemUpdateHandler = new ItemUpdateHandler();
     }
 
     // increase, decrease Quality functions
@@ -25,59 +27,15 @@ class GildedRose {
     // "Conjured XY" quality decreases -2 per day
     // Item can not have quality above 50, except Sulfuras fixed at 80 always
 
+
+    // Aged Brie
+    // Backstage passes to a TAFKAL80ETC concert
+    // Sulfuras, Hand of Ragnaros
+
     public void updateQuality() {
         // Changed to for-each loop
         for (Item item : items) {
-            if (!item.name.equals("Aged Brie")
-                && !item.name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                if (item.quality > 0) {
-                    if (!item.name.equals("Sulfuras, Hand of Ragnaros")) {
-                        item.quality = item.quality - 1;
-                    }
-                }
-            } else {
-                if (item.quality < 50) {
-                    item.quality = item.quality + 1;
-
-                    if (item.name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                        if (item.sellIn < 11) {
-                            if (item.quality < 50) {
-                                item.quality = item.quality + 1;
-                            }
-                        }
-
-                        if (item.sellIn < 6) {
-                            if (item.quality < 50) {
-                                item.quality = item.quality + 1;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (!item.name.equals("Sulfuras, Hand of Ragnaros")) {
-                item.sellIn = item.sellIn - 1;
-            }
-
-            if (item.sellIn < 0) {
-                if (!item.name.equals("Aged Brie")) {
-                    if (!item.name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                        if (item.quality > 0) {
-                            if (!item.name.equals("Sulfuras, Hand of Ragnaros")) {
-                                item.quality = item.quality - 1;
-                            }
-                        }
-                    } else {
-                        // Simplified the items quality to be set as 0, item can not have negative quality once
-                        // sellIn date is passed
-                        item.quality = 0;
-                    }
-                } else {
-                    if (item.quality < 50) {
-                        item.quality = item.quality + 1;
-                    }
-                }
-            }
+            itemUpdateHandler.handle(item);
         }
     }
 }
